@@ -24,6 +24,7 @@ train_data, test_data = train_test_split(data, test_size=0.2)
 model_settings = {
   'optimizer': Adam(lr=0.001, decay=1e-6),
   'loss': 'mse',
+  'output_activation': 'sigmoid'
 }
 
 # define the input and encoding dimensions of the autoencoder
@@ -38,7 +39,7 @@ encoded = Dense(32, activation='relu')(encoded)
 # create the decoder layers of the autoencoder
 decoded = Dense(64, activation='relu')(encoded)
 decoded = Dense(128, activation='relu')(decoded)
-decoded = Dense(train_data.shape[1], activation='sigmoid')(decoded)
+decoded = Dense(train_data.shape[1], activation=model_settings['output_activation'])(decoded)
 
 # create the autoencoder model
 autoencoder = Model(input_data, decoded)
@@ -56,6 +57,10 @@ sys.stdout = output_file
 
 # print the model summary
 print(autoencoder.summary())
+
+# print the model settings
+for key, value in model_settings.items():
+  print(f'{key}: {value}')
 
 # train the model
 autoencoder.fit(train_data, train_data, epochs=130, batch_size=4)
@@ -85,8 +90,8 @@ plt.legend()
 plt.title('Original vs Regenerated ECG')
 plt.xlabel('Index')
 plt.ylabel('Recording')
-plt.show()
 plt.savefig(sys.stdout.buffer)
+plt.show()
 
 # reset the stdout to the original
 comp_png_file.close()
