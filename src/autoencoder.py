@@ -48,7 +48,7 @@ autoencoder = Model(input_data, decoded)
 autoencoder.compile(optimizer=model_settings['optimizer'], loss=model_settings['loss'])
 
 # reroute the stdout to a custom output file
-output_id = int(time.time())
+output_id = time.strftime('%Y%m%d-%H%M%S')
 os.mkdir(f'../out/{output_id}')
 output_file_name = f'../out/{output_id}/output.txt'
 output_file = open(output_file_name, 'w+')
