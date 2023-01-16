@@ -1,5 +1,7 @@
 import scipy.io as sio
 import matplotlib.pyplot as plt
+import numpy as np
+import csv
 
 subject = '10'   # subject number to load data from, 01-69 (make sure there are two digits)
 
@@ -18,8 +20,21 @@ print(f'Sampling Frequency (fs): {fs}')
 fs_new = 250
 proc_ecg = raw_ecg[::fs//fs_new]
 
-# plot the downsampled ECG data
-plt.plot(proc_ecg[:2000])
+# split the proc_ecg data into 500 arrays of equal length and store it in a list
+sample_length = len(proc_ecg) // 500
+proc_ecg = [proc_ecg[i*sample_length:(i+1)*sample_length] for i in range(500)]
+
+# print the shape of the final dataset that is saved
+print(f'Final shape of the dataset: {np.shape(proc_ecg)}')
+
+# save the proc_ecg data in a csv file
+with open('../res/data.csv', 'w', newline='') as f:
+  writer = csv.writer(f)
+  for sample in proc_ecg:
+    writer.writerow(sample)
+
+# plot the first segment of the downsampled ECG data
+plt.plot(proc_ecg[0])
 plt.ylabel('Voltage (mV)')
 plt.xlabel('Sample')
 plt.title('ECG')
