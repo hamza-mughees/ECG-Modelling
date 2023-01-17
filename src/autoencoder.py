@@ -24,7 +24,16 @@ train_data, test_data = train_test_split(data, test_size=0.2)
 model_settings = {
   'optimizer': Adam(lr=0.001, decay=1e-6),
   'loss': 'mse',
-  'output_activation': 'sigmoid'
+  'encode_activations': [
+    'elu',
+    'elu',
+    'relu'
+  ],
+  'decode_activations': [
+    'relu',
+    'elu',
+    'elu'
+  ]
 }
 
 # define the input and encoding dimensions of the autoencoder
@@ -32,14 +41,14 @@ encoding_dim = 32
 input_data = Input(shape=(train_data.shape[1],))
 
 # create the encoder layers of the autoencoder
-encoded = Dense(128, activation='relu')(input_data)
-encoded = Dense(64, activation='relu')(encoded)
-encoded = Dense(32, activation='relu')(encoded)
+encoded = Dense(128, activation=model_settings['encode_activations'][0])(input_data)
+encoded = Dense(64, activation=model_settings['encode_activations'][1])(encoded)
+encoded = Dense(32, activation=model_settings['encode_activations'][2])(encoded)
 
 # create the decoder layers of the autoencoder
-decoded = Dense(64, activation='relu')(encoded)
-decoded = Dense(128, activation='relu')(decoded)
-decoded = Dense(train_data.shape[1], activation=model_settings['output_activation'])(decoded)
+decoded = Dense(64, activation=model_settings['decode_activations'][0])(encoded)
+decoded = Dense(128, activation=model_settings['decode_activations'][1])(decoded)
+decoded = Dense(train_data.shape[1], activation=model_settings['decode_activations'][2])(decoded)
 
 # create the autoencoder model
 autoencoder = Model(input_data, decoded)
