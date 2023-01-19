@@ -1,9 +1,11 @@
-import scipy.io as sio
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
+import scipy.io as sio
+from scipy.signal import resample
 import csv
 
 subject = '10'   # subject number to load data from, 01-69 (make sure there are two digits)
+n_samples = 500
 
 # load the data from the specified file
 data = sio.loadmat(f'../ephnogram-a-simultaneous-electrocardiogram-and-phonocardiogram-database-1.0.0/MAT/ECGPCG00{subject}.mat')
@@ -18,11 +20,11 @@ print(f'Sampling Frequency (fs): {fs}')
 
 # downsample the raw ECG data
 fs_new = 250
-proc_ecg = raw_ecg[::fs//fs_new]
+proc_ecg = resample(raw_ecg, (len(raw_ecg)*fs_new)//fs)
 
 # split the proc_ecg data into 500 arrays of equal length and store it in a list
-sample_length = len(proc_ecg) // 500
-proc_ecg = [proc_ecg[i*sample_length:(i+1)*sample_length] for i in range(500)]
+sample_length = len(proc_ecg) // n_samples
+proc_ecg = [proc_ecg[i*sample_length:(i+1)*sample_length] for i in range(n_samples)]
 
 # print the shape of the final dataset that is saved
 print(f'Final shape of the dataset: {np.shape(proc_ecg)}')
