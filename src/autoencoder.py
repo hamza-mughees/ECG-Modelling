@@ -91,10 +91,22 @@ sys.stdout = comp_png_file
 
 # define plot settings
 sample_ind = 1
+max_plot_size = 1000
+
+plt1 = {
+  'x': range(min(len(test_data[sample_ind]), max_plot_size)),
+  'y': test_data[sample_ind, :min(len(test_data[sample_ind]), max_plot_size)],
+  'label': 'Original ECG'
+}
+plt2 = {
+  'x': range(min(len(regenerated_data[sample_ind]), max_plot_size)),
+  'y': regenerated_data[sample_ind, :min(len(regenerated_data[sample_ind]), max_plot_size)],
+  'label': 'Regenerated ECG'
+}
 
 # plot the original data and the regenerated data
-plt.plot(range(len(test_data[sample_ind])), test_data[sample_ind], label='Original Data')
-plt.plot(range(len(regenerated_data[sample_ind])), regenerated_data[sample_ind], label='Regenerated Data')
+plt.plot(plt1['x'], plt1['y'], label=plt1['label'])
+plt.plot(plt2['x'], plt2['y'], label=plt2['label'])
 plt.legend()
 plt.title('Original vs Regenerated ECG')
 plt.xlabel('Index')
