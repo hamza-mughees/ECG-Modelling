@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.layers import Input, Dense
+from tensorflow.keras.layers import Input, Dense, Dropout
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from sklearn.model_selection import train_test_split
@@ -42,12 +42,16 @@ input_data = Input(shape=(train_data.shape[1],))
 
 # create the encoder layers of the autoencoder
 encoded = Dense(128, activation=model_settings['encode_activations'][0])(input_data)
+encoded = Dropout(rate=0.2)(encoded)
 encoded = Dense(64, activation=model_settings['encode_activations'][1])(encoded)
-encoded = Dense(32, activation=model_settings['encode_activations'][2])(encoded)
+encoded = Dropout(rate=0.2)(encoded)
+encoded = Dense(encoding_dim, activation=model_settings['encode_activations'][2])(encoded)
 
 # create the decoder layers of the autoencoder
 decoded = Dense(64, activation=model_settings['decode_activations'][0])(encoded)
+encoded = Dropout(rate=0.2)(encoded)
 decoded = Dense(128, activation=model_settings['decode_activations'][1])(decoded)
+encoded = Dropout(rate=0.2)(encoded)
 decoded = Dense(train_data.shape[1], activation=model_settings['decode_activations'][2])(decoded)
 
 # create the autoencoder model
