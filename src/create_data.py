@@ -6,7 +6,7 @@ import csv
 
 subject = '10' # subject number to load data from, 01-69 (make sure there are two digits)
 fs_new = 250 # new sampling frequency
-n_samples = 500 # number of samples in the final dataset
+n_samples = 1000 # number of samples in the final dataset
 overlap = 0.5 # overlap percentage between windows
 
 # load the data from the specified file
@@ -41,7 +41,7 @@ with open('../res/data.csv', 'w', newline='') as f:
     writer.writerow(sample)
 
 # plot the first 1000 points of the first segment of the downsampled ECG data
-plt.plot(ecg_data[0, :min(len(ecg_data[0], 1000))])
+plt.plot(ecg_data[0][:min(len(ecg_data[0]), 1000)])
 plt.ylabel('Voltage (mV)')
 plt.xlabel('Sample')
 plt.title('ECG')
