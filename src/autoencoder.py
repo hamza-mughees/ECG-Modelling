@@ -1,9 +1,11 @@
 import pandas as pd
 import numpy as np
 import tensorflow as tf
+from tensorflow import keras
 from tensorflow.keras.layers import Input, Dense, Dropout
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import LearningRateScheduler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
@@ -20,9 +22,20 @@ data = df.to_numpy()
 # perform the train-test-split
 train_data, test_data = train_test_split(data, test_size=0.2)
 
+# define decay rate and decay operation
+def step_decay(epoch, lr):
+    decay_rate = 1e-6
+    step_size = 1
+    if epoch % step_size == 0:
+        return lr * (1 - decay_rate)
+    return lr
+
+# create learning rate schedular
+lr_scheduler = LearningRateScheduler(step_decay)
+
 # define model settings
 model_settings = {
-  'optimizer': Adam(lr=0.001, decay=1e-6),
+  'optimizer': Adam(learning_rate=0.001),
   'loss': 'mse',
   'encode_activations': [
     'elu',
@@ -76,7 +89,7 @@ for key, value in model_settings.items():
   print(f'{key}: {value}')
 
 # train the model
-autoencoder.fit(train_data, train_data, epochs=260, batch_size=4)
+autoencoder.fit(train_data, train_data, epochs=260, batch_size=4, callbacks=[lr_scheduler, CustomCallback()])
 
 # use the trained autoencoder to regenerate the input data
 regenerated_data = autoencoder.predict(test_data)
