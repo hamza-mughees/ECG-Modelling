@@ -89,7 +89,7 @@ for key, value in model_settings.items():
   print(f'{key}: {value}')
 
 # train the model
-autoencoder.fit(train_data, train_data, epochs=260, batch_size=4, callbacks=[lr_scheduler, CustomCallback()])
+autoencoder.fit(train_data, train_data, epochs=260, batch_size=4, callbacks=[lr_scheduler])
 
 # use the trained autoencoder to regenerate the input data
 regenerated_data = autoencoder.predict(test_data)
