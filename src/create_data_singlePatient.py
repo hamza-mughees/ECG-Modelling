@@ -24,7 +24,7 @@ print(f'Sampling Frequency (fs): {fs}')
 ds_ecg = resample(raw_ecg, (len(raw_ecg)*fs_new)//fs)
 
 # calculate window size for overlapping segments
-window_size = int((len(ds_ecg) // n_samples) // overlap)
+window_size = int((len(ds_ecg) // n_samples) // (1 - overlap))
 ecg_data = []
 
 # create the dataset using the overlapping windows
