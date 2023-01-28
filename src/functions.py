@@ -1,11 +1,19 @@
 from scipy.signal import resample
 
 def progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=50, fill='█'):
+    # calculate the percentage of completion
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    
+    # calculate the filled length of the progress bar
     filled_length = int(length * iteration // total)
+    
+    # generate the progress bar
     bar = fill * filled_length + '-' * (length - filled_length)
+    
+    # print the progress bar
     print(f'\r{prefix} {iteration}/{total} |{bar}| {percent}% {suffix}', end='\r')
-    # Print New Line on Complete
+    
+    # print New Line on Complete
     if iteration == total: 
         print()
 
