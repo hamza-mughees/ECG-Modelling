@@ -14,7 +14,7 @@ import time
 import os
 
 # load the data from the csv file into a pandas dataframe
-df = pd.read_csv("../res/data.csv", header=None)
+df = pd.read_csv("../res/allPatients.csv", header=None)
 
 # convert the dataframe to a numpy array
 data = df.to_numpy()
@@ -89,7 +89,7 @@ for key, value in model_settings.items():
   print(f'{key}: {value}')
 
 # train the model
-autoencoder.fit(train_data, train_data, epochs=260, batch_size=4, callbacks=[lr_scheduler])
+autoencoder.fit(train_data, train_data, epochs=1500, batch_size=50, callbacks=[lr_scheduler])
 
 # use the trained autoencoder to regenerate the input data
 regenerated_data = autoencoder.predict(test_data)
