@@ -5,7 +5,7 @@ from tensorflow import keras
 from tensorflow.keras.layers import Input, Dense, Dropout
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import LearningRateScheduler
+from tensorflow.keras.callbacks import LearningRateScheduler, EarlyStopping
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
@@ -33,6 +33,8 @@ def step_decay(epoch, lr):
 # create learning rate schedular
 lr_scheduler = LearningRateScheduler(step_decay)
 
+early_stopping = EarlyStopping(monitor='loss', patience=5)
+
 # define model settings
 model_settings = {
   'optimizer': Adam(learning_rate=0.001),
@@ -46,7 +48,7 @@ model_settings = {
     'relu',
     'elu',
     'elu'
-  ]
+  ],
 }
 
 # define the input and encoding dimensions of the autoencoder
@@ -89,7 +91,7 @@ for key, value in model_settings.items():
   print(f'{key}: {value}')
 
 # train the model
-autoencoder.fit(train_data, train_data, epochs=1500, batch_size=50, callbacks=[lr_scheduler])
+autoencoder.fit(train_data, train_data, epochs=1500, batch_size=50, callbacks=[lr_scheduler, early_stopping])
 
 # use the trained autoencoder to regenerate the input data
 regenerated_data = autoencoder.predict(test_data)

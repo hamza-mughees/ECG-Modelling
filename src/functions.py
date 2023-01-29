@@ -13,7 +13,7 @@ def progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=50, 
     # print the progress bar
     print(f'\r{prefix} {iteration}/{total} |{bar}| {percent}% {suffix}', end='\r')
     
-    # print New Line on Complete
+    # print new line on complete
     if iteration == total: 
         print()
 
