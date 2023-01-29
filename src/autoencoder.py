@@ -22,6 +22,9 @@ data = df.to_numpy()
 # perform the train-test-split
 train_data, test_data = train_test_split(data, test_size=0.2)
 
+# perform the train-val-split
+train_data, val_data = train_test_split(train_data, test_size=0.1)
+
 # define decay rate and decay operation
 def step_decay(epoch, lr):
     decay_rate = 1e-6
@@ -33,7 +36,7 @@ def step_decay(epoch, lr):
 # create learning rate schedular
 lr_scheduler = LearningRateScheduler(step_decay)
 
-early_stopping = EarlyStopping(monitor='loss', patience=5)
+early_stopping = EarlyStopping(monitor='val_loss', patience=5)
 
 # define model settings
 model_settings = {
@@ -91,7 +94,10 @@ for key, value in model_settings.items():
   print(f'{key}: {value}')
 
 # train the model
-autoencoder.fit(train_data, train_data, epochs=1500, batch_size=50, callbacks=[lr_scheduler, early_stopping])
+autoencoder.fit(train_data, train_data, 
+                epochs=1500, batch_size=50, 
+                validation_data=(val_data, val_data),
+                callbacks=[lr_scheduler, early_stopping])
 
 # use the trained autoencoder to regenerate the input data
 regenerated_data = autoencoder.predict(test_data)

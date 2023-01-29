@@ -4,6 +4,8 @@ import scipy.io as sio
 from scipy.signal import resample
 import csv
 
+from functions import proc_single_ecg
+
 subject = '10' # subject number to load data from, 01-69 (make sure there are two digits)
 fs_new = 250 # new sampling frequency
 n_samples = 1000 # number of samples in the final dataset
@@ -20,22 +22,14 @@ fs = data["fs"][0, 0]
 print(f'Size: {len(raw_ecg)}')
 print(f'Sampling Frequency (fs): {fs}')
 
-# downsample the raw ECG data
-ds_ecg = resample(raw_ecg, (len(raw_ecg)*fs_new)//fs)
-
-# calculate window size for overlapping segments
-window_size = int((len(ds_ecg) // n_samples) // (1 - overlap))
-ecg_data = []
-
-# create the dataset using the overlapping windows
-for i in range(0, len(ds_ecg) - int(window_size*overlap), int(window_size*overlap)):
-  ecg_data.append(ds_ecg[i:i+window_size])
+# process the ECG data
+ecg_data = proc_single_ecg(raw_ecg, fs, fs_new=250, n_samples=1000, overlap=0.5)
 
 # print the shape of the final dataset that is saved
 print(f'Final shape of the dataset: {np.shape(ecg_data)}')
 
 # save the proc_ecg data in a csv file
-with open('../res/data.csv', 'w', newline='') as f:
+with open('../res/singlePatient.csv', 'w', newline='') as f:
   writer = csv.writer(f)
   for sample in ecg_data:
     writer.writerow(sample)
