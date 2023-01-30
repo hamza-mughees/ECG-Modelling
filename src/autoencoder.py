@@ -95,7 +95,7 @@ for key, value in model_settings.items():
 
 # train the model
 autoencoder.fit(train_data, train_data, 
-                epochs=5000, batch_size=100, 
+                epochs=5000, batch_size=200, 
                 validation_data=(val_data, val_data),
                 callbacks=[lr_scheduler, early_stopping])
 
