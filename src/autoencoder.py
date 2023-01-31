@@ -117,7 +117,7 @@ comp_png_file = open(f'../out/{output_id}/comparison.png', 'w')
 sys.stdout = comp_png_file
 
 # define plot settings
-sample_ind = 1
+sample_ind = 10000
 max_plot_size = 1000
 
 plt1 = {
