@@ -5,7 +5,7 @@ from tensorflow import keras
 from tensorflow.keras.layers import Input, Dense, Dropout
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.losses import LogCosh
+from tensorflow.keras.losses import LogCosh, Huber
 from tensorflow.keras.callbacks import LearningRateScheduler, EarlyStopping
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
@@ -43,7 +43,7 @@ early_stopping = EarlyStopping(monitor='val_loss', patience=10)
 # define model settings
 model_settings = {
   'optimizer': Adam(learning_rate=0.001),
-  'loss': LogCosh(),
+  'loss': Huber(),
   'encode_activations': [
     'elu',
     'elu',
