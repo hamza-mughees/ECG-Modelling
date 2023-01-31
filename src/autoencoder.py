@@ -36,7 +36,8 @@ def step_decay(epoch, lr):
 # create learning rate schedular
 lr_scheduler = LearningRateScheduler(step_decay)
 
-early_stopping = EarlyStopping(monitor='val_loss', patience=5)
+# create early stopping policy
+early_stopping = EarlyStopping(monitor='val_loss', patience=10)
 
 # define model settings
 model_settings = {
