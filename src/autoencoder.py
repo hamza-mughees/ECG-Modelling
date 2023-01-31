@@ -20,10 +20,10 @@ df = pd.read_csv("../res/allPatients.csv", header=None)
 data = df.to_numpy()
 
 # perform the train-test-split
-train_data, test_data = train_test_split(data, test_size=0.2)
+train_data, test_data = train_test_split(data, test_size=0.2, shuffle=False)
 
 # perform the train-val-split
-train_data, val_data = train_test_split(train_data, test_size=0.1)
+train_data, val_data = train_test_split(train_data, test_size=0.1, shuffle=False)
 
 # define decay rate and decay operation
 def step_decay(epoch, lr):
