@@ -56,12 +56,14 @@ model_settings = {
   ],
 }
 
-# define the input and encoding dimensions of the autoencoder
+# define the input layer and encoding dimensions of the autoencoder
 encoding_dim = 32
-input_data = Input(shape=(train_data.shape[1],))
+input_layer = Input(shape=(train_data.shape[1],))
 
 # create the encoder layers of the autoencoder
-encoded = Dense(128, activation=model_settings['encode_activations'][0])(input_data)
+encoded = Dense(512, activation='elu')(input_layer)
+encoded = Dense(256, activation='elu')(encoded)
+encoded = Dense(128, activation=model_settings['encode_activations'][0])(encoded)
 encoded = Dropout(rate=0.2)(encoded)
 encoded = Dense(64, activation=model_settings['encode_activations'][1])(encoded)
 encoded = Dropout(rate=0.2)(encoded)
@@ -69,13 +71,17 @@ encoded = Dense(encoding_dim, activation=model_settings['encode_activations'][2]
 
 # create the decoder layers of the autoencoder
 decoded = Dense(64, activation=model_settings['decode_activations'][0])(encoded)
-encoded = Dropout(rate=0.2)(encoded)
+# decoded = Dropout(rate=0.2)(decoded)
 decoded = Dense(128, activation=model_settings['decode_activations'][1])(decoded)
-encoded = Dropout(rate=0.2)(encoded)
-decoded = Dense(train_data.shape[1], activation=model_settings['decode_activations'][2])(decoded)
+# decoded = Dropout(rate=0.2)(decoded)
+decoded = Dense(256, activation='elu')(decoded)
+decoded = Dense(512, activation='elu')(decoded)
+
+# define the output layer of the autoencoder
+output_layer = Dense(train_data.shape[1], activation=model_settings['decode_activations'][2])(decoded)
 
 # create the autoencoder model
-autoencoder = Model(input_data, decoded)
+autoencoder = Model(input_layer, output_layer)
 
 # compile the model
 autoencoder.compile(optimizer=model_settings['optimizer'], loss=model_settings['loss'])
