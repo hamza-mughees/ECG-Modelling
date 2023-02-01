@@ -62,7 +62,9 @@ input_layer = Input(shape=(train_data.shape[1],))
 
 # create the encoder layers of the autoencoder
 encoded = Dense(512, activation='elu')(input_layer)
+encoded = Dropout(rate=0.2)(encoded)
 encoded = Dense(256, activation='elu')(encoded)
+encoded = Dropout(rate=0.2)(encoded)
 encoded = Dense(128, activation=model_settings['encode_activations'][0])(encoded)
 encoded = Dropout(rate=0.2)(encoded)
 encoded = Dense(64, activation=model_settings['encode_activations'][1])(encoded)
