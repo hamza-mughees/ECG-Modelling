@@ -1,18 +1,21 @@
 import pandas as pd
 import numpy as np
+from sklearn.model_selection import train_test_split
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.layers import Input, Dense, Dropout
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.losses import LogCosh, Huber
+from tensorflow.keras.losses import LogCosh, Huber, MeanSquaredError
 from tensorflow.keras.callbacks import LearningRateScheduler, EarlyStopping
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 import sys
 import time
 import os
+
+np.random.seed(1)
+tf.random.set_seed(1)
 
 # load the data from the csv file into a pandas dataframe
 df = pd.read_csv("../res/allPatients.csv", header=None)
@@ -61,10 +64,8 @@ encoding_dim = 32
 input_layer = Input(shape=(train_data.shape[1],))
 
 # create the encoder layers of the autoencoder
-encoded = Dense(512, activation='elu')(input_layer)
-encoded = Dropout(rate=0.2)(encoded)
-encoded = Dense(256, activation='elu')(encoded)
-encoded = Dropout(rate=0.2)(encoded)
+encoded = Dense(256, activation='elu')(input_layer)
+# encoded = Dropout(rate=0.2)(encoded)
 encoded = Dense(128, activation=model_settings['encode_activations'][0])(encoded)
 encoded = Dropout(rate=0.2)(encoded)
 encoded = Dense(64, activation=model_settings['encode_activations'][1])(encoded)
@@ -77,7 +78,6 @@ decoded = Dense(64, activation=model_settings['decode_activations'][0])(encoded)
 decoded = Dense(128, activation=model_settings['decode_activations'][1])(decoded)
 # decoded = Dropout(rate=0.2)(decoded)
 decoded = Dense(256, activation='elu')(decoded)
-decoded = Dense(512, activation='elu')(decoded)
 
 # define the output layer of the autoencoder
 output_layer = Dense(train_data.shape[1], activation=model_settings['decode_activations'][2])(decoded)
@@ -112,9 +112,13 @@ autoencoder.fit(train_data, train_data,
 # use the trained autoencoder to regenerate the input data
 regenerated_data = autoencoder.predict(test_data)
 
-# calculate the mean squared error between the original and regenerated data
-mse = mean_squared_error(test_data, regenerated_data)
+# calculate performance metrics between the original and regenerated data
+mse = MeanSquaredError()(test_data, regenerated_data).numpy()
 print("Mean Squared Error: ", mse)
+lc = LogCosh()(test_data, regenerated_data).numpy()
+print("Log Cosh: ", lc)
+h = Huber()(test_data, regenerated_data).numpy()
+print("Huber: ", h)
 
 # reset the stdout to the original, and close the custom file
 sys.stdout = orig_stdout
