@@ -27,7 +27,7 @@ for i in range(len(files)):
         continue
     
     # process the ECG data
-    ecg_data = proc_single_ecg(ecg, fs, fs_new=250, n_samples=1000, overlap=0)
+    ecg_data = proc_single_ecg(ecg, fs, fs_new=250, n_samples=2000, overlap=0)
     
     # check if it's the first file, if so set to write mode 'w', else, set to append mode 'a'
     if i == 0:
