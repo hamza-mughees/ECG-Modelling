@@ -65,7 +65,6 @@ input_layer = Input(shape=(train_data.shape[1],))
 
 # create the encoder layers of the autoencoder
 encoded = Dense(256, activation='elu')(input_layer)
-# encoded = Dropout(rate=0.2)(encoded)
 encoded = Dense(128, activation=model_settings['encode_activations'][0])(encoded)
 encoded = Dropout(rate=0.2)(encoded)
 encoded = Dense(64, activation=model_settings['encode_activations'][1])(encoded)
@@ -74,9 +73,7 @@ encoded = Dense(encoding_dim, activation=model_settings['encode_activations'][2]
 
 # create the decoder layers of the autoencoder
 decoded = Dense(64, activation=model_settings['decode_activations'][0])(encoded)
-# decoded = Dropout(rate=0.2)(decoded)
 decoded = Dense(128, activation=model_settings['decode_activations'][1])(decoded)
-# decoded = Dropout(rate=0.2)(decoded)
 decoded = Dense(256, activation='elu')(decoded)
 
 # define the output layer of the autoencoder
@@ -129,7 +126,7 @@ comp_png_file = open(f'../out/{output_id}/comparison.png', 'w')
 sys.stdout = comp_png_file
 
 # define plot settings
-sample_ind = 10000
+sample_ind = 20000
 max_plot_size = 1000
 
 plt1 = {
