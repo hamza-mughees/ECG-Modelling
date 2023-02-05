@@ -61,6 +61,7 @@ model_settings = {
     'relu',
     'LeakyReLU',
     'LeakyReLU',
+    'LeakyReLU',
     'LeakyReLU'
   ],
 }
@@ -86,9 +87,13 @@ encoded = Dense(encoding_dim, activation=model_settings['encode_activations'][7]
 decoded = Dense(64, activation=model_settings['decode_activations'][0])(encoded)
 decoded = Dense(128, activation=model_settings['decode_activations'][1])(decoded)
 decoded = Dense(256, activation=model_settings['decode_activations'][2])(decoded)
+decoded = Reshape((256, 1))(decoded)
+decoded = Conv1D(16, kernel_size=3, padding='same', activation=model_settings['decode_activations'][3])(decoded)
+decoded = MaxPooling1D(pool_size=2)(decoded)
+decoded = Flatten()(decoded)
 
 # define the output layer of the autoencoder
-output_layer = Dense(train_data.shape[1], activation=model_settings['decode_activations'][2])(decoded)
+output_layer = Dense(train_data.shape[1], activation=model_settings['decode_activations'][4])(decoded)
 
 # create the autoencoder model
 autoencoder = Model(input_layer, output_layer)
@@ -111,14 +116,23 @@ print(autoencoder.summary())
 for key, value in model_settings.items():
   print(f'{key}: {value}')
 
+# get the start time
+st = time.time()
+
 # train the model
 autoencoder.fit(train_data, train_data, 
                 epochs=5000, batch_size=200, 
                 validation_data=(val_data, val_data),
                 callbacks=[lr_scheduler, early_stopping])
 
+# get the end time
+et = time.time()
+
 # use the trained autoencoder to regenerate the input data
 regenerated_data = autoencoder.predict(test_data)
+
+# print the time elapsed during training
+print(f'Training time: {time.strftime("%H:%M:%S", time.gmtime(et - st))} secs')
 
 # calculate performance metrics between the original and regenerated data
 mse = MeanSquaredError()(test_data, regenerated_data).numpy()
