@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras.layers import Input, Dense, Dropout, LeakyReLU
+from tensorflow.keras.layers import Input, Dense, Dropout, Conv1D, Flatten, Reshape, MaxPooling1D
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import LogCosh, Huber, MeanSquaredError
@@ -51,6 +51,10 @@ model_settings = {
     'LeakyReLU',
     'LeakyReLU',
     'LeakyReLU',
+    'LeakyReLU',
+    'LeakyReLU',
+    'LeakyReLU',
+    'LeakyReLU',
     'relu'
   ],
   'decode_activations': [
@@ -66,12 +70,17 @@ encoding_dim = 32
 input_layer = Input(shape=(train_data.shape[1],))
 
 # create the encoder layers of the autoencoder
-encoded = Dense(256, activation=model_settings['encode_activations'][0])(input_layer)
-encoded = Dense(128, activation=model_settings['encode_activations'][1])(encoded)
+# encoded = Dense(256, activation=model_settings['encode_activations'][0])(input_layer)
+encoded = Reshape((train_data.shape[1], 1))(input_layer)
+encoded = Conv1D(16, kernel_size=3, padding='same', activation=model_settings['encode_activations'][0])(encoded)
+encoded = MaxPooling1D(pool_size=2)(encoded)
+encoded = Flatten()(encoded)
+encoded = Dense(256, activation=model_settings['encode_activations'][4])(encoded)
+encoded = Dense(128, activation=model_settings['encode_activations'][5])(encoded)
 encoded = Dropout(rate=0.2)(encoded)
-encoded = Dense(64, activation=model_settings['encode_activations'][2])(encoded)
+encoded = Dense(64, activation=model_settings['encode_activations'][6])(encoded)
 encoded = Dropout(rate=0.2)(encoded)
-encoded = Dense(encoding_dim, activation=model_settings['encode_activations'][3])(encoded)
+encoded = Dense(encoding_dim, activation=model_settings['encode_activations'][7])(encoded)
 
 # create the decoder layers of the autoencoder
 decoded = Dense(64, activation=model_settings['decode_activations'][0])(encoded)
