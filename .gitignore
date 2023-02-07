@@ -162,3 +162,4 @@ cython_debug/
 # Custom
 ephnogram-a-simultaneous-electrocardiogram-and-phonocardiogram-database-1.0.0/
 res/
+*.h5

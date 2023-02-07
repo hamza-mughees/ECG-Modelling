@@ -17,7 +17,7 @@ def progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=50, 
     if iteration == total: 
         print()
 
-def proc_single_ecg(raw_ecg, fs, fs_new, n_samples, overlap):
+def proc_single_ecg(raw_ecg, fs, fs_new, n_samples, overlap=0):
     # downsample the raw ECG data
     ds_ecg = resample(raw_ecg, (len(raw_ecg)*fs_new)//fs)
 

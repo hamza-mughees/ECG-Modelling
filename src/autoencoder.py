@@ -128,6 +128,9 @@ autoencoder.fit(train_data, train_data,
 # get the end time
 et = time.time()
 
+# save the autoencoder
+autoencoder.save(f'../out/{output_id}/autoencoder.h5')
+
 # use the trained autoencoder to regenerate the input data
 regenerated_data = autoencoder.predict(test_data)
 
@@ -152,16 +155,27 @@ sys.stdout = comp_png_file
 
 # define plot settings
 sample_ind = 20000
+n_subjects = 5
 max_plot_size = 1000
+overlap = 0.2
+
+test_y = []
+regenerated_y = []
+
+for i in range(n_subjects):
+  test_sample = test_data[sample_ind+i]
+  regenerated_sample = regenerated_data[sample_ind+i]
+  test_y.append(test_sample[:int(len(test_sample)*(1-overlap))])
+  regenerated_y.append(regenerated_sample[:int(len(regenerated_sample)*(1-overlap))])
 
 plt1 = {
-  'x': range(min(len(test_data[sample_ind]), max_plot_size)),
-  'y': test_data[sample_ind, :min(len(test_data[sample_ind]), max_plot_size)],
+  'x': range(len(test_y.flatten())),
+  'y': test_y.flatten(),
   'label': 'Original ECG'
 }
 plt2 = {
-  'x': range(min(len(regenerated_data[sample_ind]), max_plot_size)),
-  'y': regenerated_data[sample_ind, :min(len(regenerated_data[sample_ind]), max_plot_size)],
+  'x': range(len(regenerated_y.flatten())),
+  'y': regenerated_y.flatten(),
   'label': 'Regenerated ECG'
 }
 
