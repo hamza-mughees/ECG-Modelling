@@ -31,17 +31,17 @@ sys.stdout = comp_png_file
 
 # the sample index to start the plot from
 sample_ind = 25000
-# the number of subjects to plot
-n_subjects = 10
-# the overlap between the original and regenerated data
+# the number of segments to plot
+n_segments = 10
+# the overlap to consider when concatenating ECG segments
 overlap = 0.2
 
 # create arrays to store the original and regenerated data
 test_y = []
 regenerated_y = []
 
-# loop over each subject and extract the original and regenerated data
-for i in range(n_subjects):
+# loop over each segment and extract the original and regenerated data
+for i in range(n_segments):
   test_sample = test_data[sample_ind+i]
   regenerated_sample = regenerated_data[sample_ind+i]
   # only keep the portion of the data that does not overlap
