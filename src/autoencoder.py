@@ -14,6 +14,9 @@ import sys
 import time
 import os
 
+import globals
+from functions import performance_vis
+
 np.random.seed(1)
 tf.random.set_seed(1)
 
@@ -131,64 +134,9 @@ et = time.time()
 # save the autoencoder
 autoencoder.save(f'../out/{output_id}/autoencoder.h5')
 
-# use the trained autoencoder to regenerate the input data
-regenerated_data = autoencoder.predict(test_data)
-
-# print the time elapsed during training
-print(f'Training time: {time.strftime("%H:%M:%S", time.gmtime(et - st))} secs')
-
-# calculate performance metrics between the original and regenerated data
-mse = MeanSquaredError()(test_data, regenerated_data).numpy()
-print("Mean Squared Error: ", mse)
-lc = LogCosh()(test_data, regenerated_data).numpy()
-print("Log Cosh: ", lc)
-h = Huber()(test_data, regenerated_data).numpy()
-print("Huber: ", h)
-
 # reset the stdout to the original, and close the custom file
 sys.stdout = orig_stdout
 output_file.close()
 
-# reroute the stdout to a compararison PNG file
-comp_png_file = open(f'../out/{output_id}/comparison.png', 'w')
-sys.stdout = comp_png_file
-
-# define plot settings
-sample_ind = 20000
-n_subjects = 5
-max_plot_size = 1000
-overlap = 0.2
-
-test_y = []
-regenerated_y = []
-
-for i in range(n_subjects):
-  test_sample = test_data[sample_ind+i]
-  regenerated_sample = regenerated_data[sample_ind+i]
-  test_y.append(test_sample[:int(len(test_sample)*(1-overlap))])
-  regenerated_y.append(regenerated_sample[:int(len(regenerated_sample)*(1-overlap))])
-
-plt1 = {
-  'x': range(len(test_y.flatten())),
-  'y': test_y.flatten(),
-  'label': 'Original ECG'
-}
-plt2 = {
-  'x': range(len(regenerated_y.flatten())),
-  'y': regenerated_y.flatten(),
-  'label': 'Regenerated ECG'
-}
-
-# plot the original data and the regenerated data
-plt.plot(plt1['x'], plt1['y'], label=plt1['label'])
-plt.plot(plt2['x'], plt2['y'], label=plt2['label'])
-plt.legend()
-plt.title('Original vs Regenerated ECG')
-plt.xlabel('Index')
-plt.ylabel('Recording')
-plt.savefig(sys.stdout.buffer)
-plt.show()
-
-# reset the stdout to the original
-comp_png_file.close()
-sys.stdout = orig_stdout
+performance_vis(test_data, model_id=output_id,
+                sample_ind=25000, n_segments=10, overlap=globals.overlap, tr_time=et-st)
