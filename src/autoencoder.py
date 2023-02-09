@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras.layers import Input, Dense, Dropout, Conv1D, Flatten, Reshape, MaxPooling1D
+from tensorflow.keras.layers import Input, Dense, Dropout, Conv1D, Flatten, Reshape, MaxPooling1D, AveragePooling1D
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import LogCosh, Huber, MeanSquaredError
@@ -77,7 +77,7 @@ input_layer = Input(shape=(train_data.shape[1],))
 # encoded = Dense(256, activation=model_settings['encode_activations'][0])(input_layer)
 encoded = Reshape((train_data.shape[1], 1))(input_layer)
 encoded = Conv1D(16, kernel_size=3, padding='same', activation=model_settings['encode_activations'][0])(encoded)
-encoded = MaxPooling1D(pool_size=2)(encoded)
+encoded = AveragePooling1D(pool_size=2)(encoded)
 encoded = Flatten()(encoded)
 encoded = Dense(256, activation=model_settings['encode_activations'][4])(encoded)
 encoded = Dense(128, activation=model_settings['encode_activations'][5])(encoded)
@@ -92,7 +92,7 @@ decoded = Dense(128, activation=model_settings['decode_activations'][1])(decoded
 decoded = Dense(256, activation=model_settings['decode_activations'][2])(decoded)
 decoded = Reshape((256, 1))(decoded)
 decoded = Conv1D(16, kernel_size=3, padding='same', activation=model_settings['decode_activations'][3])(decoded)
-decoded = MaxPooling1D(pool_size=2)(decoded)
+decoded = AveragePooling1D(pool_size=2)(decoded)
 decoded = Flatten()(decoded)
 
 # define the output layer of the autoencoder
@@ -138,5 +138,6 @@ autoencoder.save(f'../out/{output_id}/autoencoder.h5')
 sys.stdout = orig_stdout
 output_file.close()
 
+# visualize and save model performance
 performance_vis(test_data, model_id=output_id,
                 sample_ind=25000, n_segments=10, overlap=globals.overlap, tr_time=et-st)
