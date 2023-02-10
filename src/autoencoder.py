@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras.layers import Input, Dense, Dropout, Conv1D, Flatten, Reshape, MaxPooling1D, AveragePooling1D
+from tensorflow.keras.layers import Input, Dense, Dropout, Conv1D, Flatten, Reshape, AveragePooling1D, Conv1DTranspose, UpSampling1D
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import LogCosh, Huber, MeanSquaredError
@@ -91,8 +91,10 @@ decoded = Dense(64, activation=model_settings['decode_activations'][0])(encoded)
 decoded = Dense(128, activation=model_settings['decode_activations'][1])(decoded)
 decoded = Dense(256, activation=model_settings['decode_activations'][2])(decoded)
 decoded = Reshape((256, 1))(decoded)
-decoded = Conv1D(16, kernel_size=3, padding='same', activation=model_settings['decode_activations'][3])(decoded)
-decoded = AveragePooling1D(pool_size=2)(decoded)
+# decoded = Conv1D(16, kernel_size=3, padding='same', activation=model_settings['decode_activations'][3])(decoded)
+decoded = Conv1DTranspose(16, kernel_size=3, padding='same', activation=model_settings['decode_activations'][3])(decoded)
+# decoded = AveragePooling1D(pool_size=2)(decoded)
+decoded = UpSampling1D(size=2)(decoded)
 decoded = Flatten()(decoded)
 
 # define the output layer of the autoencoder
