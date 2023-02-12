@@ -49,7 +49,7 @@ early_stopping = EarlyStopping(monitor='val_loss', patience=10)
 # define model settings
 model_settings = {
   'optimizer': Adam(learning_rate=0.001),
-  'loss': Huber(),
+  'loss': 'mse',
   'encode_activations': [
     'LeakyReLU',
     'LeakyReLU',
@@ -74,36 +74,26 @@ encoding_dim = 32
 input_layer = Input(shape=(train_data.shape[1],))
 
 # create the encoder layers of the autoencoder
-# encoded = Dense(256, activation=model_settings['encode_activations'][0])(input_layer)
 encoded = Reshape((train_data.shape[1], 1))(input_layer)
 encoded = Conv1D(16, kernel_size=3, padding='same', activation=model_settings['encode_activations'][0])(encoded)
 encoded = AveragePooling1D(pool_size=2)(encoded)
-# encoded = Flatten()(encoded)
-# encoded = Dense(256, activation=model_settings['encode_activations'][4])(encoded)
 encoded = Conv1D(16, kernel_size=3, padding='same', activation=model_settings['encode_activations'][4])(encoded)
 encoded = AveragePooling1D(pool_size=2)(encoded)
-# encoded = Dense(128, activation=model_settings['encode_activations'][5])(encoded)
 encoded = Dropout(rate=0.2)(encoded)
 encoded = Conv1D(8, kernel_size=3, padding='same', activation=model_settings['encode_activations'][5])(encoded)
-# encoded = Dense(64, activation=model_settings['encode_activations'][6])(encoded)
 encoded = AveragePooling1D(pool_size=2)(encoded)
 encoded = Dropout(rate=0.2)(encoded)
 encoded = Conv1D(4, kernel_size=3, padding='same', activation=model_settings['encode_activations'][6])(encoded)
 encoded = AveragePooling1D(pool_size=2)(encoded)
-# encoded = Dense(encoding_dim, activation=model_settings['encode_activations'][7])(encoded)
 encoded = Conv1D(2, kernel_size=3, padding='same', activation=model_settings['encode_activations'][7])(encoded)
 
 # create the decoder layers of the autoencoder
 decoded = Conv1DTranspose(4, kernel_size=3, padding='same', activation=model_settings['decode_activations'][0])(encoded)
 decoded = UpSampling1D(size=2)(decoded)
-# decoded = Dense(64, activation=model_settings['decode_activations'][0])(encoded)
 decoded = Conv1DTranspose(8, kernel_size=3, padding='same', activation=model_settings['decode_activations'][1])(encoded)
 decoded = UpSampling1D(size=2)(decoded)
-# decoded = Dense(128, activation=model_settings['decode_activations'][1])(decoded)
 decoded = Conv1DTranspose(16, kernel_size=3, padding='same', activation=model_settings['decode_activations'][2])(encoded)
 decoded = UpSampling1D(size=2)(decoded)
-# decoded = Dense(256, activation=model_settings['decode_activations'][2])(decoded)
-# decoded = Reshape((256, 1))(decoded)
 decoded = Conv1DTranspose(16, kernel_size=3, padding='same', activation=model_settings['decode_activations'][3])(decoded)
 decoded = UpSampling1D(size=2)(decoded)
 decoded = Flatten()(decoded)
