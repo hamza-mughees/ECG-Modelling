@@ -102,7 +102,6 @@ encoded = Dense(encoding_dim, activation=model_settings['encode_activations'][8]
 decoded = Dense(64, activation=model_settings['decode_activations'][0])(encoded)
 decoded = Dense(128, activation=model_settings['decode_activations'][1])(decoded)
 decoded = Dense(256, activation=model_settings['decode_activations'][2])(decoded)
-# decoded = Reshape((256, 1))(decoded)
 decoded = Dense(224, activation=model_settings['decode_activations'][3])(decoded)
 decoded = Reshape((14, 16))(decoded)
 decoded = Conv1DTranspose(16, kernel_size=3, padding='same', activation=model_settings['decode_activations'][0])(decoded)
@@ -114,10 +113,9 @@ decoded = UpSampling1D(size=2)(decoded)
 decoded = Conv1DTranspose(2, kernel_size=3, padding='same', activation=model_settings['decode_activations'][6])(decoded)
 decoded = UpSampling1D(size=2)(decoded)
 decoded = Conv1DTranspose(1, kernel_size=3, padding='same', activation=model_settings['decode_activations'][7])(decoded)
-decoded = Flatten()(decoded)
 
 # define the output layer of the autoencoder
-output_layer = Dense(train_data.shape[1], activation=model_settings['decode_activations'][9])(decoded)
+output_layer = Flatten()(decoded)
 
 # create the autoencoder model
 autoencoder = Model(input_layer, output_layer)
