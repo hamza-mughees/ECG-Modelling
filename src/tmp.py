@@ -17,6 +17,7 @@ model_settings = {
     'LeakyReLU',
     'LeakyReLU',
     'LeakyReLU',
+    'LeakyReLU',
     'relu'
   ],
   'decode_activations': [
@@ -51,26 +52,28 @@ encoded = Conv1D(16, kernel_size=3, padding='same', activation=model_settings['e
 encoded = AveragePooling1D(pool_size=2)(encoded)
 encoded = Conv1D(32, kernel_size=3, padding='same', activation=model_settings['encode_activations'][8])(encoded)
 encoded = Flatten()(encoded)
-encoded = Dense(256, activation=model_settings['encode_activations'][5])(encoded)
-encoded = Dense(128, activation=model_settings['encode_activations'][6])(encoded)
-encoded = Dense(64, activation=model_settings['encode_activations'][7])(encoded)
-encoded = Dense(encoding_dim, activation=model_settings['encode_activations'][8])(encoded)
+encoded = Dense(512, activation=model_settings['encode_activations'][5])(encoded)
+encoded = Dense(256, activation=model_settings['encode_activations'][6])(encoded)
+encoded = Dense(128, activation=model_settings['encode_activations'][7])(encoded)
+encoded = Dense(64, activation=model_settings['encode_activations'][9])(encoded)
+encoded = Dense(encoding_dim, activation=model_settings['encode_activations'][9])(encoded)
 
 # create the decoder layers of the autoencoder
 decoded = Dense(64, activation=model_settings['decode_activations'][0])(encoded)
 decoded = Dense(128, activation=model_settings['decode_activations'][1])(decoded)
 decoded = Dense(256, activation=model_settings['decode_activations'][2])(decoded)
-decoded = Dense(448, activation=model_settings['decode_activations'][3])(decoded)
+decoded = Dense(512, activation=model_settings['decode_activations'][3])(decoded)
+decoded = Dense(448, activation=model_settings['decode_activations'][4])(decoded)
 decoded = Reshape((14, 32))(decoded)
-decoded = Conv1DTranspose(16, kernel_size=3, padding='same', activation=model_settings['decode_activations'][0])(decoded)
+decoded = Conv1DTranspose(16, kernel_size=3, padding='same', activation=model_settings['decode_activations'][5])(decoded)
 decoded = UpSampling1D(size=2)(decoded)
-decoded = Conv1DTranspose(8, kernel_size=3, padding='same', activation=model_settings['decode_activations'][4])(decoded)
+decoded = Conv1DTranspose(8, kernel_size=3, padding='same', activation=model_settings['decode_activations'][6])(decoded)
 decoded = UpSampling1D(size=2)(decoded)
-decoded = Conv1DTranspose(4, kernel_size=3, padding='same', activation=model_settings['decode_activations'][5])(decoded)
+decoded = Conv1DTranspose(4, kernel_size=3, padding='same', activation=model_settings['decode_activations'][7])(decoded)
 decoded = UpSampling1D(size=2)(decoded)
-decoded = Conv1DTranspose(2, kernel_size=3, padding='same', activation=model_settings['decode_activations'][6])(decoded)
+decoded = Conv1DTranspose(2, kernel_size=3, padding='same', activation=model_settings['decode_activations'][8])(decoded)
 decoded = UpSampling1D(size=2)(decoded)
-decoded = Conv1DTranspose(1, kernel_size=3, padding='same', activation=model_settings['decode_activations'][7])(decoded)
+decoded = Conv1DTranspose(1, kernel_size=3, padding='same', activation=model_settings['decode_activations'][9])(decoded)
 
 # define the output layer of the autoencoder
 output_layer = Flatten()(decoded)
