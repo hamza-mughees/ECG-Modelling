@@ -1,13 +1,12 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras.layers import Input, Dense, Dropout, Conv1D, Flatten, Reshape, AveragePooling1D, Conv1DTranspose, UpSampling1D, GlobalAveragePooling1D
-from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.losses import LogCosh, Huber, MeanSquaredError
-from tensorflow.keras.callbacks import LearningRateScheduler, EarlyStopping
+from tensorflow import random
+from keras.layers import Input, Dense, Dropout, Conv1D, Flatten, Reshape, AveragePooling1D, Conv1DTranspose, UpSampling1D, GlobalAveragePooling1D
+from keras.models import Model
+from keras.optimizers import Adam
+from keras.losses import LogCosh, Huber, MeanSquaredError
+from keras.callbacks import LearningRateScheduler, EarlyStopping
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 import sys
@@ -18,7 +17,7 @@ import globals
 from functions import performance_vis
 
 np.random.seed(1)
-tf.random.set_seed(1)
+random.set_seed(1)
 
 # load the data from the csv file into a pandas dataframe
 df = pd.read_csv("../res/allPatients.csv", header=None)
@@ -106,7 +105,7 @@ decoded = Flatten()(decoded)
 decoded = Dense(512, activation=model_settings['decode_activations'][5])(decoded)
 
 # define the output layer of the autoencoder
-output_layer = Dense(train_data.shape[1], activation=model_settings['decode_activations'][5])(decoded)
+output_layer = Dense(train_data.shape[1], activation=model_settings['decode_activations'][6])(decoded)
 
 # create the autoencoder model
 autoencoder = Model(input_layer, output_layer)
