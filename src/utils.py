@@ -1,10 +1,12 @@
 from scipy.signal import resample
-from tensorflow.keras.models import load_model
+from keras.models import load_model
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-from tensorflow.keras.losses import LogCosh, Huber, MeanSquaredError
+from keras.losses import LogCosh, Huber, MeanSquaredError
 import time
+import tensorflow as tf
+import io
 
 def progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=50, fill='█'):
     # calculate the percentage of completion
@@ -37,12 +39,21 @@ def proc_single_ecg(raw_ecg, fs, fs_new, n_samples, overlap=0):
     
     return ecg_data
 
-def performance_vis(test_data, model_id, sample_ind, n_segments, overlap, tr_time=None):
+def performance_vis(test_data, model_id, sample_ind, n_segments, overlap, tr_time=None, bayes=False):
     # load the autoencoder model from the directory with model ID
     model = load_model(f'../out/{model_id}/autoencoder.h5')
 
-    # use the trained autoencoder model to regenerate the input on the test data
-    regenerated_data = model.predict(test_data)
+    if bayes:
+        # if bayes is true, use the model to regenerate the input data multiple times
+        # and calculate the mean and standard deviation of the regenerations
+        regenerations = []
+        for i in range(5):
+            regenerations.append(model.predict(test_data))
+        regenerated_data = np.mean(regenerations, axis=0)
+        regenerated_std = np.std(regenerations, axis=0)
+    else:
+        # use the model to regenerate the input data once
+        regenerated_data = model.predict(test_data)
 
     if tr_time:
         orig_stdout = sys.stdout
@@ -71,6 +82,9 @@ def performance_vis(test_data, model_id, sample_ind, n_segments, overlap, tr_tim
     test_y = []
     regenerated_y = []
 
+    if bayes:
+        regenerated_err = []
+
     # loop over each segment and extract the original and regenerated data
     for i in range(n_segments):
         test_sample = test_data[sample_ind+i]
@@ -78,26 +92,39 @@ def performance_vis(test_data, model_id, sample_ind, n_segments, overlap, tr_tim
         # only keep the portion of the data that does not overlap
         test_y.append(test_sample[:int(len(test_sample)*(1-overlap))])
         regenerated_y.append(regenerated_sample[:int(len(regenerated_sample)*(1-overlap))])
+        # repeat for bayes if bayes true
+        if bayes:
+            regenerated_std_sample = regenerated_std[sample_ind+i]
+            regenerated_err.append(regenerated_std_sample[:int(len(regenerated_std_sample)*(1-overlap))])
 
     # convert the lists to Numpy arrays
     test_y = np.array(test_y)
     regenerated_y = np.array(regenerated_y)
+    # repeat for bayes if bayes is true
+    if bayes:
+        regenerated_err = np.array(regenerated_err)
 
     # create dictionaries to store the plot data and labels
     plt1 = {
-    'x': range(len(test_y.flatten())),
-    'y': test_y.flatten(),
-    'label': 'Original ECG'
+        'x': range(len(test_y.flatten())),
+        'y': test_y.flatten(),
+        'label': 'Original ECG'
     }
     plt2 = {
-    'x': range(len(regenerated_y.flatten())),
-    'y': regenerated_y.flatten(),
-    'label': 'Regenerated ECG'
+        'x': range(len(regenerated_y.flatten())),
+        'y': regenerated_y.flatten(),
+        'label': 'Regenerated ECG'
     }
+
+    # add error if bayes is true
+    if bayes:
+        plt2['err'] = regenerated_err.flatten()
 
     # plot the original data and the regenerated data
     plt.plot(plt1['x'], plt1['y'], label=plt1['label'])
     plt.plot(plt2['x'], plt2['y'], label=plt2['label'])
+    if bayes:
+        plt.fill_between(plt2['x'], plt2['y'] - plt2['err'], plt2['y'] + plt2['err'], alpha=0.7)
     plt.legend()
     plt.title('Original vs Regenerated ECG')
     plt.xlabel('Index')

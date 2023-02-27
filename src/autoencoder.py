@@ -14,7 +14,7 @@ import time
 import os
 
 import globals
-from functions import performance_vis
+from utils import performance_vis
 
 np.random.seed(1)
 random.set_seed(1)
@@ -81,10 +81,10 @@ encoded = Conv1D(16, kernel_size=3, padding='same', activation=model_settings['e
 encoded = AveragePooling1D(pool_size=2)(encoded)
 encoded = Conv1D(16, kernel_size=3, padding='same', activation=model_settings['encode_activations'][3])(encoded)
 encoded = AveragePooling1D(pool_size=2)(encoded)
-encoded = Dropout(rate=0.2)(encoded)
+encoded = Dropout(rate=0.2)(encoded, training=globals.bayes)
 encoded = Conv1D(8, kernel_size=3, padding='same', activation=model_settings['encode_activations'][4])(encoded)
 encoded = AveragePooling1D(pool_size=2)(encoded)
-encoded = Dropout(rate=0.2)(encoded)
+encoded = Dropout(rate=0.2)(encoded, training=globals.bayes)
 encoded = Conv1D(4, kernel_size=3, padding='same', activation=model_settings['encode_activations'][5])(encoded)
 encoded = AveragePooling1D(pool_size=2)(encoded)
 encoded = Conv1D(2, kernel_size=3, padding='same', activation=model_settings['encode_activations'][6])(encoded)
@@ -149,4 +149,4 @@ output_file.close()
 
 # visualize and save model performance
 performance_vis(test_data, model_id=output_id,
-                sample_ind=25000, n_segments=10, overlap=globals.overlap, tr_time=et-st)
+                sample_ind=25000, n_segments=10, overlap=globals.overlap, tr_time=et-st, bayes=globals.bayes)

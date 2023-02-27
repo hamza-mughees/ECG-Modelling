@@ -4,7 +4,7 @@ import scipy.io as sio
 from scipy.signal import resample
 import csv
 
-from functions import proc_single_ecg
+from utils import proc_single_ecg
 
 subject = '10' # subject number to load data from, 01-69 (make sure there are two digits)
 fs_new = 250 # new sampling frequency

@@ -4,7 +4,7 @@ import csv
 import os
 
 import globals
-from functions import progress_bar, proc_single_ecg
+from utils import progress_bar, proc_single_ecg
 
 # data directory containing MAT files
 data_dir = '../ephnogram-a-simultaneous-electrocardiogram-and-phonocardiogram-database-1.0.0/MAT'
