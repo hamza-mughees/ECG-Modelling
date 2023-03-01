@@ -7,6 +7,7 @@ from keras.losses import LogCosh, Huber, MeanSquaredError
 import time
 import tensorflow as tf
 import io
+from mpl_toolkits.mplot3d import Axes3D
 
 def progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=50, fill='█'):
     # calculate the percentage of completion
@@ -51,6 +52,8 @@ def performance_vis(test_data, model_id, sample_ind, n_segments, overlap, tr_tim
             regenerations.append(model.predict(test_data))
         regenerated_data = np.mean(regenerations, axis=0)
         regenerated_std = np.std(regenerations, axis=0)
+        # print(f'Means: {regenerated_data[0]}')
+        # print(f'Standard Deviations: {regenerated_std[0]}')
     else:
         # use the model to regenerate the input data once
         regenerated_data = model.predict(test_data)
@@ -120,18 +123,39 @@ def performance_vis(test_data, model_id, sample_ind, n_segments, overlap, tr_tim
     if bayes:
         plt2['err'] = regenerated_err.flatten()
 
-    # plot the original data and the regenerated data
-    plt.plot(plt1['x'], plt1['y'], label=plt1['label'])
-    plt.plot(plt2['x'], plt2['y'], label=plt2['label'])
-    if bayes:
-        plt.fill_between(plt2['x'], plt2['y'] - plt2['err'], plt2['y'] + plt2['err'], alpha=0.7)
-    plt.legend()
-    plt.title('Original vs Regenerated ECG')
-    plt.xlabel('Index')
-    plt.ylabel('Recording')
-    plt.savefig(sys.stdout.buffer)
-    plt.show()
+    if not bayes:
+        # plot the original data and the regenerated data
+        plt.plot(plt1['x'], plt1['y'], label=plt1['label'])
+        plt.plot(plt2['x'], plt2['y'], label=plt2['label'])
+        plt.legend()
+        plt.title('Original vs Regenerated ECG')
+        plt.xlabel('Index')
+        plt.ylabel('Recording')
+        plt.savefig(sys.stdout.buffer)
+        plt.show()
+    else:
+        means = plt2['y']
+        stds = plt2['err']
+
+        plot_gaussians_3d(means, stds, sys.stdout.buffer)
 
     # reset the stdout to the original
     comp_png_file.close()
     sys.stdout = orig_stdout
+
+def plot_gaussians_3d(means, stds, buffer):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    x = np.linspace(min(means), max(means), 1000) # 1000 points between -5 and 5
+
+    # Loop over means and stds to plot each gaussian
+    for i, (mean, std) in enumerate(zip(means, stds)):
+        y = 1 / (std * np.sqrt(2 * np.pi)) * np.exp(-0.5 * ((x - mean) / std) ** 2)
+        ax.plot(i*np.ones_like(x), x, y, 'b-', alpha=0.1)
+
+    ax.set_xlabel('Index')
+    ax.set_ylabel('Recording')
+    ax.set_zlabel('Probability Density')
+    plt.savefig(buffer)
+    plt.show()
