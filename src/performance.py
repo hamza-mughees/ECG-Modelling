@@ -19,4 +19,4 @@ data = df.to_numpy()
 _, test_data = train_test_split(data, test_size=0.2, shuffle=False)
 
 performance_vis(test_data, model_id='20230224-131313',
-                sample_ind=25000, n_segments=4, overlap=globals.overlap, bayes=globals.bayes)
+                sample_ind=25500, n_segments=10, overlap=globals.overlap, bayes=globals.bayes)

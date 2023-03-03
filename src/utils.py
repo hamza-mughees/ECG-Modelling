@@ -5,9 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from keras.losses import LogCosh, Huber, MeanSquaredError
 import time
-import tensorflow as tf
-import io
-from mpl_toolkits.mplot3d import Axes3D
 
 def progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=50, fill='█'):
     # calculate the percentage of completion
@@ -48,12 +45,10 @@ def performance_vis(test_data, model_id, sample_ind, n_segments, overlap, tr_tim
         # if bayes is true, use the model to regenerate the input data multiple times
         # and calculate the mean and standard deviation of the regenerations
         regenerations = []
-        for i in range(5):
+        for i in range(15):
             regenerations.append(model.predict(test_data))
         regenerated_data = np.mean(regenerations, axis=0)
         regenerated_std = np.std(regenerations, axis=0)
-        # print(f'Means: {regenerated_data[0]}')
-        # print(f'Standard Deviations: {regenerated_std[0]}')
     else:
         # use the model to regenerate the input data once
         regenerated_data = model.predict(test_data)
@@ -75,11 +70,6 @@ def performance_vis(test_data, model_id, sample_ind, n_segments, overlap, tr_tim
             print(f'Huber: {h}')
 
             sys.stdout = orig_stdout
-    
-    # reroute the stdout to a compararison PNG file
-    orig_stdout = sys.stdout
-    comp_png_file = open(f'../out/{model_id}/comparison.png', 'w')
-    sys.stdout = comp_png_file
 
     # create arrays to store the original and regenerated data
     test_y = []
@@ -122,40 +112,72 @@ def performance_vis(test_data, model_id, sample_ind, n_segments, overlap, tr_tim
     # add error if bayes is true
     if bayes:
         plt2['err'] = regenerated_err.flatten()
+    
+    # reroute the stdout to a comparison PNG file
+    orig_stdout = sys.stdout
+    comp_png_file = open(f'../out/{model_id}/comparison.png', 'w')
+    sys.stdout = comp_png_file
 
-    if not bayes:
-        # plot the original data and the regenerated data
-        plt.plot(plt1['x'], plt1['y'], label=plt1['label'])
-        plt.plot(plt2['x'], plt2['y'], label=plt2['label'])
-        plt.legend()
-        plt.title('Original vs Regenerated ECG')
-        plt.xlabel('Index')
-        plt.ylabel('Recording')
-        plt.savefig(sys.stdout.buffer)
-        plt.show()
-    else:
+    # plot the original data and the regenerated data (2d)
+    test_ecg = plt1['y']
+    regenerated_ecg = plt2['y']
+    plot_comparison(test_ecg, regenerated_ecg)
+
+    # close the 2d file
+    comp_png_file.close()
+
+    if bayes:
+        # reroute the stdout to a gaussians PNG file
+        comp_png_file = open(f'../out/{model_id}/gaussians.png', 'w')
+        sys.stdout = comp_png_file
+
+        # plot the regenerated means with Gaussian distributions (3d)
+        test_ecg = plt1['y']
         means = plt2['y']
         stds = plt2['err']
+        plot_gaussians_3d(means, stds)
 
-        plot_gaussians_3d(means, stds, sys.stdout.buffer)
-
+        # close the 3d file
+        comp_png_file.close()
+    
     # reset the stdout to the original
-    comp_png_file.close()
     sys.stdout = orig_stdout
 
-def plot_gaussians_3d(means, stds, buffer):
+def plot_comparison(test_ecg, regenerated_ecg):
+    # plot the original data and the regenerated data
+    plt.plot(np.arange(len(test_ecg)), test_ecg, label='Original ECG')
+    plt.plot(np.arange(len(regenerated_ecg)), regenerated_ecg, label='Regenerated ECG')
+    plt.legend()
+    plt.title('Original vs Regenerated ECG')
+    plt.xlabel('Index')
+    plt.ylabel('Recording')
+    plt.savefig(sys.stdout.buffer)
+    plt.show()
+
+def plot_gaussians_3d(means, stds, test_ecg=None, threshold=0.01):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
-    x = np.linspace(min(means), max(means), 1000) # 1000 points between -5 and 5
+    x = np.linspace(-0.5, 0.5, 1000) # 1000 points between -0.5 and 0.5
 
-    # Loop over means and stds to plot each gaussian
+    # loop over means and stds to plot each gaussian
     for i, (mean, std) in enumerate(zip(means, stds)):
         y = 1 / (std * np.sqrt(2 * np.pi)) * np.exp(-0.5 * ((x - mean) / std) ** 2)
-        ax.plot(i*np.ones_like(x), x, y, 'b-', alpha=0.1)
+        # find the indices of the values in y that are above the threshold
+        idx = np.where(y > threshold)[0]
+        # create new arrays that only include the relevant parts of the distribution
+        x_new = x[idx]
+        y_new = y[idx]
+        z_new = i * np.ones_like(x_new)
+        ax.plot(z_new, x_new, y_new, 'b-', alpha=0.2)
+
+    # plot the means and the test data if given
+    ax.plot(np.arange(len(means)), means, np.zeros_like(means), 'r-', linewidth=0.5)
+    if test_ecg:
+        ax.plot(np.arange(len(test_ecg)), test_ecg, np.zeros_like(test_ecg), 'g-', linewidth=0.5)
 
     ax.set_xlabel('Index')
     ax.set_ylabel('Recording')
     ax.set_zlabel('Probability Density')
-    plt.savefig(buffer)
+    plt.savefig(sys.stdout.buffer)
     plt.show()
