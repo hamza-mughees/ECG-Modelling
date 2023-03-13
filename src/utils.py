@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from keras.losses import LogCosh, Huber, MeanSquaredError
 import time
+import os
 
 def progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=50, fill='█'):
     # calculate the percentage of completion
@@ -23,9 +24,18 @@ def progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=50, 
     if iteration == total: 
         print()
 
-def proc_single_ecg(raw_ecg, fs, fs_new, n_samples, overlap=0):
+def proc_single_ecg(raw_ecg, fs, fs_new, n_samples, overlap=0, save_dir=None):
     # downsample the raw ECG data
     ds_ecg = resample(raw_ecg, (len(raw_ecg)*fs_new)//fs)
+
+    # save downsampled ECG to folder, if given
+    if save_dir:
+        save_path = f'../res/{save_dir}'
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+        with open(f'{save_path}/output.txt', 'w') as f:
+            for v in ds_ecg:
+                f.write(f'{v}\n')
 
     # calculate window size for overlapping segments
     window_size = int((len(ds_ecg) // n_samples) // (1-overlap))
@@ -123,7 +133,7 @@ def performance_vis(test_data, model_id, sample_ind, n_segments, overlap, tr_tim
     regenerated_ecg = plt2['y']
     plot_comparison(test_ecg, regenerated_ecg)
 
-    # close the 2d file
+    # close the comparison file
     comp_png_file.close()
 
     if bayes:
@@ -137,7 +147,7 @@ def performance_vis(test_data, model_id, sample_ind, n_segments, overlap, tr_tim
         stds = plt2['err']
         plot_gaussians_3d(means, stds)
 
-        # close the 3d file
+        # close the Gaussians file
         comp_png_file.close()
     
     # reset the stdout to the original
