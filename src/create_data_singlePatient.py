@@ -1,15 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io as sio
-from scipy.signal import resample
 import csv
 
+import globals
 from utils import proc_single_ecg
 
-subject = '10' # subject number to load data from, 01-69 (make sure there are two digits)
-fs_new = 250 # new sampling frequency
-n_samples = 1000 # number of samples in the final dataset
-overlap = 0.5 # overlap percentage between windows
+subject = '65' # subject number to load data from, 01-69 (make sure there are two digits)
 
 # load the data from the specified file
 data = sio.loadmat(f'../ephnogram-a-simultaneous-electrocardiogram-and-phonocardiogram-database-1.0.0/MAT/ECGPCG00{subject}.mat')
@@ -23,7 +20,7 @@ print(f'Size: {len(raw_ecg)}')
 print(f'Sampling Frequency (fs): {fs}')
 
 # process the ECG data
-ecg_data = proc_single_ecg(raw_ecg, fs, fs_new=250, n_samples=1000, overlap=0.5)
+ecg_data = proc_single_ecg(raw_ecg, fs, fs_new=250, n_samples=2500, overlap=globals.overlap)
 
 # print the shape of the final dataset that is saved
 print(f'Final shape of the dataset: {np.shape(ecg_data)}')

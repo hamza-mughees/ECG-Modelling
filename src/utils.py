@@ -145,7 +145,7 @@ def performance_vis(test_data, model_id, sample_ind, n_segments, overlap, tr_tim
         test_ecg = plt1['y']
         means = plt2['y']
         stds = plt2['err']
-        plot_gaussians_3d(means, stds)
+        plot_gaussians_3d(means, stds, test_ecg=test_ecg)
 
         # close the Gaussians file
         comp_png_file.close()
@@ -170,6 +170,8 @@ def plot_gaussians_3d(means, stds, test_ecg=None, threshold=0.01):
 
     x = np.linspace(-0.5, 0.5, 1000) # 1000 points between -0.5 and 0.5
 
+    fig2, ax2 = plt.subplots()  # Create a new figure and axis for the bird's eye view plot
+
     # loop over means and stds to plot each gaussian
     for i, (mean, std) in enumerate(zip(means, stds)):
         y = 1 / (std * np.sqrt(2 * np.pi)) * np.exp(-0.5 * ((x - mean) / std) ** 2)
@@ -181,13 +183,62 @@ def plot_gaussians_3d(means, stds, test_ecg=None, threshold=0.01):
         z_new = i * np.ones_like(x_new)
         ax.plot(z_new, x_new, y_new, 'b-', alpha=0.2)
 
+        # Add the shaded interval between the two ends of the distribution to the bird's eye view plot
+        if len(x_new) > 0:
+            lower_bound = x_new[0]
+            upper_bound = x_new[-1]
+            ax2.fill_between([i, i], lower_bound, upper_bound, alpha=0.2, color='b')
+
     # plot the means and the test data if given
-    ax.plot(np.arange(len(means)), means, np.zeros_like(means), 'r-', linewidth=0.5)
-    if test_ecg:
-        ax.plot(np.arange(len(test_ecg)), test_ecg, np.zeros_like(test_ecg), 'g-', linewidth=0.5)
+    ax.plot(np.arange(len(means)), means, np.zeros_like(means), 'r-', linewidth=0.5, label='Regenerated ECG Means')
 
     ax.set_xlabel('Index')
     ax.set_ylabel('Recording')
     ax.set_zlabel('Probability Density')
-    plt.savefig(sys.stdout.buffer)
+    ax.set_title('Regenerated ECG Means with Gaussian Distributions')
+    ax.legend()
+    # plt.show()
+
+    # Customize the bird's eye view plot
+    ax2.plot(np.arange(len(test_ecg)), test_ecg, 'g-', linewidth=0.5, label='Original ECG')
+    ax2.set_xlabel('Index')
+    ax2.set_ylabel('Recording')
+    ax2.set_title('Original ECG with Regenerated Gaussian Intervals')
+    ax2.legend()
     plt.show()
+
+def loss_single_ecg(model_id, ecg_data):
+    # load the autoencoder model from the directory with model ID
+    model = load_model(f'../out/{model_id}/autoencoder.h5')
+
+    # regenerate the ECG samples using the autoencoder model
+    regenerations = []
+    for _ in range(15):
+        regenerations.append(model.predict(ecg_data))
+    regen_ecg = np.mean(regenerations, axis=0)
+
+    # compute the mean squared error between the original and reconstructed ECG samples
+    losses = []
+    for orig, regen in zip(ecg_data, regen_ecg):
+        losses.append(MeanSquaredError()(orig, regen).numpy())
+    
+    # plot the losses
+    plt.plot(range(len(losses)), losses, '-r', linewidth=2)
+    plt.xlabel('ECG Sample')
+    plt.ylabel('Loss')
+    plt.title('Losses over ECG Samples (Autoencoder)')
+    plt.xlim(1, 2600)
+    plt.ylim(0, 0.2)
+    plt.show()
+
+    mean_loss = np.mean(losses)
+    median_loss = np.median(losses)
+    std_loss = np.std(losses)
+    min_loss = np.min(losses)
+    max_loss = np.max(losses)
+
+    print(f"Mean loss: {mean_loss:.4f}")
+    print(f"Median loss: {median_loss:.4f}")
+    print(f"Standard deviation of loss: {std_loss:.4f}")
+    print(f"Minimum loss: {min_loss:.4f}")
+    print(f"Maximum loss: {max_loss:.4f}")

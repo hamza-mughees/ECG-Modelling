@@ -2,4 +2,4 @@
 overlap = 0.2
 
 # Bayesian? (True or False)
-bayes = True
+bayes = False

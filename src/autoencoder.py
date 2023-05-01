@@ -5,7 +5,6 @@ from tensorflow import random
 from keras.layers import Input, Dense, Dropout, Conv1D, Flatten, Reshape, AveragePooling1D, Conv1DTranspose, UpSampling1D, GlobalAveragePooling1D
 from keras.models import Model
 from keras.optimizers import Adam
-from keras.losses import LogCosh, Huber, MeanSquaredError
 from keras.callbacks import LearningRateScheduler, EarlyStopping
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
